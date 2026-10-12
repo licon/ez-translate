@@ -37,6 +37,31 @@
                 <button id="settings-icon-button" class="icon-button" data-i18n-title="settingsLink" title="Settings">⚙️</button>
             </div>
         </div>
+        <details class="selection-settings">
+            <summary data-i18n="selectionSettingsLabel"></summary>
+            <div class="selection-setting-item">
+                <label for="disable-editable-toggle" data-i18n="disableTranslationInEditableLabel"></label>
+                <label class="switch">
+                    <input type="checkbox" id="disable-editable-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="selection-setting-item">
+                <label for="auto-translate-toggle" data-i18n="translateOnSelectionLabel"></label>
+                <label class="switch">
+                    <input type="checkbox" id="auto-translate-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="selection-setting-item">
+                <label for="require-ctrl-toggle" data-i18n="requireCtrlOnSelectionLabel"></label>
+                <label class="switch">
+                    <input type="checkbox" id="require-ctrl-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <p id="combined-selection-hint" class="combined-selection-hint" data-i18n="combinedSelectionHint" hidden></p>
+        </details>
     </div>
     <script src="popup.js"></script>
 </body>

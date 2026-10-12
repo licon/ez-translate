@@ -568,6 +568,21 @@
     "langPapiamento": {
         "message": "Papiamento"
     },
+    "selectionSettingsLabel": {
+        "message": "Auswahleinstellungen"
+    },
+    "disableTranslationInEditableLabel": {
+        "message": "Übersetzung in Textfeldern deaktivieren"
+    },
+    "translateOnSelectionLabel": {
+        "message": "Nach der Auswahl sofort übersetzen"
+    },
+    "requireCtrlOnSelectionLabel": {
+        "message": "Nach der Auswahl Ctrl drücken, um zu übersetzen"
+    },
+    "combinedSelectionHint": {
+        "message": "Wenn beide aktiviert sind, startet die Übersetzung direkt nach der Auswahl; Ctrl und das Symbol sind nicht nötig."
+    },
     "selectionTranslateLabel": {
         "message": "Seiteninterne Übersetzung aktivieren",
         "description": "Beschriftung für den Umschalter zum Aktivieren/Deaktivieren der seiteninternen Auswahlübersetzung."

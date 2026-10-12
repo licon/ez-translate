@@ -4,22 +4,49 @@
 let translateIcon = null;
 let resultPopover = null;
 let isEnabled = true; // 默认启用
+let disableInEditable = false;
+let translateOnSelection = false;
+let requireCtrlOnSelection = false;
+let selectionRequestId = 0;
+let editableSelectionOrigin = null;
+let pendingSelection = null;
+let ctrlPressCandidate = false;
 
 // --- 初始化和设置监听 ---
 // 首次加载时获取设置
-chrome.storage.local.get('isSelectionTranslationEnabled', (result) => {
+chrome.storage.local.get([
+    'isSelectionTranslationEnabled',
+    'disableTranslationInEditable',
+    'translateOnSelection',
+    'requireCtrlOnSelection'
+], (result) => {
     // 如果未设置，则默认为 true
     isEnabled = result.isSelectionTranslationEnabled !== false;
+    disableInEditable = result.disableTranslationInEditable === true;
+    translateOnSelection = result.translateOnSelection === true;
+    requireCtrlOnSelection = result.requireCtrlOnSelection === true;
 });
 
 // 监听设置变化
 chrome.storage.onChanged.addListener((changes, namespace) => {
-    if (namespace === 'local' && changes.isSelectionTranslationEnabled) {
+    if (namespace !== 'local') return;
+    if (changes.isSelectionTranslationEnabled) {
         isEnabled = changes.isSelectionTranslationEnabled.newValue;
         // 如果禁用了，立即移除现有UI
         if (!isEnabled) {
             removeTranslationUI();
         }
+    }
+    if (changes.disableTranslationInEditable) {
+        disableInEditable = changes.disableTranslationInEditable.newValue === true;
+    }
+    if (changes.translateOnSelection) {
+        translateOnSelection = changes.translateOnSelection.newValue === true;
+        if (translateOnSelection) pendingSelection = null;
+    }
+    if (changes.requireCtrlOnSelection) {
+        requireCtrlOnSelection = changes.requireCtrlOnSelection.newValue === true;
+        if (!requireCtrlOnSelection) ctrlPressCandidate = false;
     }
 });
 
@@ -90,23 +117,62 @@ function showImageTranslationResultPopover(translation, isLoading) {
     });
 }
 
+function getEditableElement(node) {
+    const element = node instanceof Element ? node : node?.parentElement;
+    if (!element) return null;
+    return element.closest('input, textarea') ||
+        (element.isContentEditable || element.closest('[role="textbox"]') ? element : null);
+}
+
+function getEventEditableElement(event) {
+    const path = event.composedPath?.() || [event.target];
+    for (const node of path) {
+        const editable = getEditableElement(node);
+        if (editable) return editable;
+    }
+    return null;
+}
+
+// 记录选区起点，防止拖选在输入框外结束时漏判
+document.addEventListener('mousedown', (event) => {
+    editableSelectionOrigin = getEventEditableElement(event);
+}, true);
+
 // 监听鼠标抬起事件，用于显示翻译图标
 document.addEventListener('mouseup', (event) => {
+    const selectionOrigin = editableSelectionOrigin;
+    editableSelectionOrigin = null;
     // 如果功能被禁用，则不执行任何操作
     if (!isEnabled) return;
 
     // 如果事件的目标是我们的UI，则不处理，避免冲突
-    if (event.target.id?.startsWith('llm-translate-')) return;
-    
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target || target.closest('#llm-translate-icon, #llm-translate-popover')) return;
+
     // 移除已有的UI
     removeTranslationUI();
 
-    const selectedText = window.getSelection().toString().trim();
+    const editable = selectionOrigin || getEventEditableElement(event) ||
+        getEditableElement(window.getSelection()?.anchorNode);
+    const input = editable?.matches('input, textarea') ? editable : null;
+    if (input?.type === 'password' || (editable && disableInEditable)) return;
+
+    let selectedText;
+    if (input) {
+        if (input.selectionStart == null || input.selectionEnd == null) return;
+        selectedText = input.value.slice(input.selectionStart, input.selectionEnd).trim();
+    } else {
+        selectedText = window.getSelection().toString().trim();
+    }
     if (selectedText.length > 0) {
         // 保存文本以备 popup 使用
         chrome.storage.local.set({ 'lastSelectedText': selectedText });
-        // 创建翻译图标
-        createTranslateIcon(event.clientX, event.clientY, selectedText);
+        if (translateOnSelection) {
+            translateSelection(event.clientX, event.clientY, selectedText);
+        } else {
+            pendingSelection = { x: event.clientX, y: event.clientY, text: selectedText };
+            createTranslateIcon(event.clientX, event.clientY, selectedText);
+        }
     }
 });
 
@@ -143,12 +209,27 @@ document.addEventListener('mousedown', (event) => {
 
 // 监听键盘事件，ESC 键关闭弹窗
 document.addEventListener('keydown', (event) => {
+    if (event.key === 'Control') {
+        if (!event.repeat && isEnabled && requireCtrlOnSelection && !translateOnSelection && pendingSelection) {
+            ctrlPressCandidate = true;
+        }
+    } else if (event.ctrlKey) {
+        ctrlPressCandidate = false;
+    }
     if (event.key === 'Escape') {
         const popover = document.querySelector('#llm-translate-popover');
         if (popover) {
             removeTranslationUI();
         }
     }
+});
+
+document.addEventListener('keyup', (event) => {
+    if (event.key !== 'Control') return;
+    const selection = pendingSelection;
+    const shouldTranslate = ctrlPressCandidate && isEnabled && requireCtrlOnSelection && !translateOnSelection && selection;
+    ctrlPressCandidate = false;
+    if (shouldTranslate) translateSelection(selection.x, selection.y, selection.text);
 });
 
 
@@ -165,7 +246,7 @@ function createTranslateIcon(x, y, text) {
     translateIcon.id = 'llm-translate-icon';
     translateIcon.style.left = `${x + window.scrollX}px`;
     translateIcon.style.top = `${y + window.scrollY + 15}px`;
-    
+
     // 使用 chrome.runtime.getURL() 加载真实的图标文件
     const iconImg = document.createElement('img');
     iconImg.id = 'llm-translate-icon-img';
@@ -180,90 +261,102 @@ function createTranslateIcon(x, y, text) {
         e.stopPropagation();
     });
 
-    translateIcon.addEventListener('click', async (e) => {
+    translateIcon.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const { targetLanguage, secondTargetLanguage } = await chrome.storage.local.get(['targetLanguage', 'secondTargetLanguage']);
-        // 存储中保存的是语言键（如 langEnglish）。但为了兼容历史数据，做健壮处理。
-        const storedPrimary = targetLanguage || 'langSimplifiedChinese';
-        const storedSecondary = secondTargetLanguage || 'langEnglish';
-
-        // Convert language keys to language names（英文名传给后端提示词使用）
-        const langKeyToEnName = {
-            'langEnglish': 'English',
-            'langSimplifiedChinese': 'Simplified Chinese',
-            'langTraditionalChinese': 'Traditional Chinese',
-            'langFrench': 'French',
-            'langSpanish': 'Spanish',
-            'langArabic': 'Arabic',
-            'langRussian': 'Russian',
-            'langPortuguese': 'Portuguese',
-            'langGerman': 'German',
-            'langItalian': 'Italian',
-            'langDutch': 'Dutch',
-            'langDanish': 'Danish',
-            'langJapanese': 'Japanese',
-            'langKorean': 'Korean',
-            'langVietnamese': 'Vietnamese',
-            'langThai': 'Thai',
-            'langIndonesian': 'Indonesian',
-            'langHindi': 'Hindi',
-            'langTurkish': 'Turkish',
-            'langPolish': 'Polish',
-            'langFinnish': 'Finnish',
-            'langHungarian': 'Hungarian',
-            'langCzech': 'Czech',
-            'langGreek': 'Greek',
-            'langRomanian': 'Romanian',
-            'langSlovak': 'Slovak'
-        };
-
-        // 兼容三种输入：语言键、英文名、其他（回退 English）
-        const normalizeToEnName = (input) => {
-            if (!input) return 'English';
-            if (langKeyToEnName[input]) return langKeyToEnName[input];
-            // 常见本地化/别名归一
-            const aliasToEnName = {
-                '中文': 'Simplified Chinese',
-                '简体中文': 'Simplified Chinese',
-                '繁體中文': 'Traditional Chinese',
-                '繁体中文': 'Traditional Chinese',
-                '英语': 'English',
-                '英文': 'English',
-                '日语': 'Japanese',
-                '日本語': 'Japanese',
-                '韩语': 'Korean',
-                '韓國語': 'Korean',
-                '한국어': 'Korean'
-            };
-            if (aliasToEnName[input]) return aliasToEnName[input];
-            // 若已是英文名称（来自旧版本或手动写入），直接使用
-            const values = Object.values(langKeyToEnName);
-            if (values.includes(input)) return input;
-            return 'English';
-        };
-
-        const targetLanguageName = normalizeToEnName(storedPrimary);
-        const secondTargetLanguageName = normalizeToEnName(storedSecondary);
-        
-        showResultPopover(x, y, chrome.i18n.getMessage('statusTranslating'));
-        chrome.runtime.sendMessage({ 
-            type: 'translate', 
-            text, 
-            targetLanguage: targetLanguageName,
-            secondTargetLanguage: secondTargetLanguageName
-        }, (response) => {
-            if (response.error) {
-                updateResultPopover(response.error);
-            } else {
-                updateResultPopover(response.translation);
-            }
-        });
-        translateIcon.remove();
-        translateIcon = null;
+        translateSelection(x, y, text);
     });
 
     document.body.appendChild(translateIcon);
+}
+
+async function translateSelection(x, y, text) {
+    pendingSelection = null;
+    ctrlPressCandidate = false;
+    const requestId = ++selectionRequestId;
+    const { targetLanguage, secondTargetLanguage } = await chrome.storage.local.get(['targetLanguage', 'secondTargetLanguage']);
+    if (requestId !== selectionRequestId) return;
+    // 存储中保存的是语言键（如 langEnglish）。但为了兼容历史数据，做健壮处理。
+    const storedPrimary = targetLanguage || 'langSimplifiedChinese';
+    const storedSecondary = secondTargetLanguage || 'langEnglish';
+
+    // Convert language keys to language names（英文名传给后端提示词使用）
+    const langKeyToEnName = {
+        'langEnglish': 'English',
+        'langSimplifiedChinese': 'Simplified Chinese',
+        'langTraditionalChinese': 'Traditional Chinese',
+        'langFrench': 'French',
+        'langSpanish': 'Spanish',
+        'langArabic': 'Arabic',
+        'langRussian': 'Russian',
+        'langPortuguese': 'Portuguese',
+        'langGerman': 'German',
+        'langItalian': 'Italian',
+        'langDutch': 'Dutch',
+        'langDanish': 'Danish',
+        'langJapanese': 'Japanese',
+        'langKorean': 'Korean',
+        'langVietnamese': 'Vietnamese',
+        'langThai': 'Thai',
+        'langIndonesian': 'Indonesian',
+        'langHindi': 'Hindi',
+        'langTurkish': 'Turkish',
+        'langPolish': 'Polish',
+        'langFinnish': 'Finnish',
+        'langHungarian': 'Hungarian',
+        'langCzech': 'Czech',
+        'langGreek': 'Greek',
+        'langRomanian': 'Romanian',
+        'langSlovak': 'Slovak'
+    };
+
+    // 兼容三种输入：语言键、英文名、其他（回退 English）
+    const normalizeToEnName = (input) => {
+        if (!input) return 'English';
+        if (langKeyToEnName[input]) return langKeyToEnName[input];
+        // 常见本地化/别名归一
+        const aliasToEnName = {
+            '中文': 'Simplified Chinese',
+            '简体中文': 'Simplified Chinese',
+            '繁體中文': 'Traditional Chinese',
+            '繁体中文': 'Traditional Chinese',
+            '英语': 'English',
+            '英文': 'English',
+            '日语': 'Japanese',
+            '日本語': 'Japanese',
+            '韩语': 'Korean',
+            '韓國語': 'Korean',
+            '한국어': 'Korean'
+        };
+        if (aliasToEnName[input]) return aliasToEnName[input];
+        // 若已是英文名称（来自旧版本或手动写入），直接使用
+        const values = Object.values(langKeyToEnName);
+        if (values.includes(input)) return input;
+        return 'English';
+    };
+
+    const targetLanguageName = normalizeToEnName(storedPrimary);
+    const secondTargetLanguageName = normalizeToEnName(storedSecondary);
+
+    if (translateIcon) {
+        translateIcon.remove();
+        translateIcon = null;
+    }
+    showResultPopover(x, y, chrome.i18n.getMessage('statusTranslating'));
+    const popover = resultPopover;
+    chrome.runtime.sendMessage({
+        type: 'translate',
+        text,
+        targetLanguage: targetLanguageName,
+        secondTargetLanguage: secondTargetLanguageName
+    }, (response) => {
+        if (requestId !== selectionRequestId || resultPopover !== popover) return;
+        if (response?.error) {
+            updateResultPopover(response.error);
+        } else {
+            updateResultPopover(response?.translation || chrome.i18n.getMessage('statusError', ['Unknown error']));
+        }
+    });
 }
 
 /**
@@ -277,7 +370,7 @@ function showResultPopover(x, y, content) {
     }
     resultPopover.style.left = `${x + window.scrollX}px`;
     resultPopover.style.top = `${y + window.scrollY + 15}px`;
-    resultPopover.innerHTML = content;
+    resultPopover.textContent = content;
     resultPopover.style.display = 'block';
 }
 
@@ -286,7 +379,7 @@ function showResultPopover(x, y, content) {
  */
 function updateResultPopover(content) {
     if (resultPopover) {
-        resultPopover.innerHTML = content;
+        resultPopover.textContent = content;
     }
 }
 
@@ -405,6 +498,9 @@ async function showTranslationResult(text, targetLanguage, secondTargetLanguage)
  * 移除所有翻译相关的UI元素
  */
 function removeTranslationUI() {
+    pendingSelection = null;
+    ctrlPressCandidate = false;
+    selectionRequestId++;
     if (translateIcon) {
         translateIcon.remove();
         translateIcon = null;

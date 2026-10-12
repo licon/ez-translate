@@ -568,6 +568,21 @@
     "langPapiamento": {
         "message": "Papiamento"
     },
+    "selectionSettingsLabel": {
+        "message": "選取翻譯設定"
+    },
+    "disableTranslationInEditableLabel": {
+        "message": "在輸入區域中停用翻譯"
+    },
+    "translateOnSelectionLabel": {
+        "message": "選取後立即顯示翻譯結果"
+    },
+    "requireCtrlOnSelectionLabel": {
+        "message": "選取後按 Ctrl 翻譯"
+    },
+    "combinedSelectionHint": {
+        "message": "兩項都開啟時，選取後立即翻譯，無需按 Ctrl 或點擊圖示。"
+    },
     "selectionTranslateLabel": {
         "message": "開啟頁面劃詞翻譯",
         "description": "用於啟用/停用頁面劃詞翻譯功能的切換開關標籤。"

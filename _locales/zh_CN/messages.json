@@ -568,6 +568,21 @@
     "langPapiamento": {
         "message": "Papiamento"
     },
+    "selectionSettingsLabel": {
+        "message": "划词设置"
+    },
+    "disableTranslationInEditableLabel": {
+        "message": "在输入区域中禁用翻译"
+    },
+    "translateOnSelectionLabel": {
+        "message": "选中后直接显示翻译结果"
+    },
+    "requireCtrlOnSelectionLabel": {
+        "message": "选中后按 Ctrl 翻译"
+    },
+    "combinedSelectionHint": {
+        "message": "两项都开启时，选中后立即翻译，无需按 Ctrl 或点击图标。"
+    },
     "selectionTranslateLabel": {
         "message": "开启页面划词翻译",
         "description": "用于启用/禁用页面划词翻译功能的切换开关的标签。"

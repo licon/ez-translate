@@ -568,6 +568,21 @@
     "langPapiamento": {
         "message": "파피아멘토"
     },
+    "selectionSettingsLabel": {
+        "message": "선택 번역 설정"
+    },
+    "disableTranslationInEditableLabel": {
+        "message": "텍스트 입력란에서 번역 사용 안 함"
+    },
+    "translateOnSelectionLabel": {
+        "message": "선택을 마치면 바로 번역"
+    },
+    "requireCtrlOnSelectionLabel": {
+        "message": "선택한 후 Ctrl 키를 눌러 번역"
+    },
+    "combinedSelectionHint": {
+        "message": "두 옵션이 모두 켜져 있으면 선택 직후 번역되며 Ctrl 키나 아이콘을 누를 필요가 없습니다."
+    },
     "selectionTranslateLabel": {
         "message": "페이지 내 번역 활성화",
         "description": "페이지 내 선택 번역을 활성화/비활성화하는 토글 스위치의 라벨입니다."

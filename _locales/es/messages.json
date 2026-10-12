@@ -568,6 +568,21 @@
     "langPapiamento": {
         "message": "Papiamento"
     },
+    "selectionSettingsLabel": {
+        "message": "Ajustes de selección"
+    },
+    "disableTranslationInEditableLabel": {
+        "message": "Desactivar traducción en campos de texto"
+    },
+    "translateOnSelectionLabel": {
+        "message": "Traducir al terminar de seleccionar"
+    },
+    "requireCtrlOnSelectionLabel": {
+        "message": "Pulsar Ctrl después de seleccionar para traducir"
+    },
+    "combinedSelectionHint": {
+        "message": "Si ambas opciones están activadas, la traducción comienza al seleccionar; no hace falta pulsar Ctrl ni el icono."
+    },
     "selectionTranslateLabel": {
         "message": "Habilitar Traducción en la Página",
         "description": "Etiqueta para el interruptor para habilitar/deshabilitar la traducción de selección en la página."

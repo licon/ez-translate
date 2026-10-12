@@ -568,6 +568,21 @@
     "langPapiamento": {
         "message": "পাপিয়ামেন্টো"
     },
+    "selectionSettingsLabel": {
+        "message": "নির্বাচন সেটিংস"
+    },
+    "disableTranslationInEditableLabel": {
+        "message": "টেক্সট ফিল্ডে অনুবাদ বন্ধ করুন"
+    },
+    "translateOnSelectionLabel": {
+        "message": "নির্বাচন শেষ হলেই অনুবাদ করুন"
+    },
+    "requireCtrlOnSelectionLabel": {
+        "message": "নির্বাচনের পরে অনুবাদ করতে Ctrl চাপুন"
+    },
+    "combinedSelectionHint": {
+        "message": "দুটিই চালু থাকলে নির্বাচন করার সঙ্গে সঙ্গে অনুবাদ শুরু হবে; Ctrl বা আইকনে ক্লিক করার প্রয়োজন নেই।"
+    },
     "selectionTranslateLabel": {
         "message": "ইন-পেজ অনুবাদ সক্ষম করুন",
         "description": "ইন-পেজ নির্বাচন অনুবাদ সক্ষম/অক্ষম করার জন্য টগল সুইচের জন্য লেবেল।"

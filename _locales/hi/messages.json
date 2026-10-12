@@ -568,6 +568,21 @@
     "langPapiamento": {
         "message": "पापियामेंटो"
     },
+    "selectionSettingsLabel": {
+        "message": "चयन सेटिंग"
+    },
+    "disableTranslationInEditableLabel": {
+        "message": "टेक्स्ट फ़ील्ड में अनुवाद बंद करें"
+    },
+    "translateOnSelectionLabel": {
+        "message": "चयन पूरा होते ही अनुवाद करें"
+    },
+    "requireCtrlOnSelectionLabel": {
+        "message": "चयन के बाद अनुवाद के लिए Ctrl दबाएँ"
+    },
+    "combinedSelectionHint": {
+        "message": "दोनों चालू होने पर चयन के तुरंत बाद अनुवाद शुरू होगा; Ctrl या आइकन दबाने की ज़रूरत नहीं है।"
+    },
     "selectionTranslateLabel": {
         "message": "इन-पेज अनुवाद सक्षम करें",
         "description": "इन-पेज चयन अनुवाद को सक्षम/अक्षम करने के लिए टॉगल स्विच के लिए लेबल।"

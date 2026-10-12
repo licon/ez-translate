@@ -568,6 +568,21 @@
     "langPapiamento": {
         "message": "パピアメント語"
     },
+    "selectionSettingsLabel": {
+        "message": "選択翻訳の設定"
+    },
+    "disableTranslationInEditableLabel": {
+        "message": "入力欄内では翻訳しない"
+    },
+    "translateOnSelectionLabel": {
+        "message": "選択後すぐに翻訳する"
+    },
+    "requireCtrlOnSelectionLabel": {
+        "message": "選択後に Ctrl キーを押して翻訳"
+    },
+    "combinedSelectionHint": {
+        "message": "両方オンの場合、選択後すぐに翻訳され、Ctrl キーやアイコンのクリックは不要です。"
+    },
     "selectionTranslateLabel": {
         "message": "ページ内翻訳を有効にする",
         "description": "ページ内選択翻訳を有効/無効にするためのトグルスイッチのラベル。"

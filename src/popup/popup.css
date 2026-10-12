@@ -1,8 +1,11 @@
 body {
     font-family: sans-serif;
-    width: 300px;
+    width: 320px;
     padding: 10px;
     background-color: #f9f9f9;
+    max-height: min(580px, calc(100vh - 20px));
+    overflow-y: auto;
+    box-sizing: border-box;
 }
 
 .container {
@@ -156,11 +159,48 @@ button:hover {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.setting-item > label:first-child,
+.selection-setting-item > label:first-child {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .right-icons {
     display: flex;
     gap: 8px;
+    flex-shrink: 0;
+}
+
+.selection-settings {
+    border-top: 1px solid #ddd;
+    padding-top: 6px;
+    padding-bottom: 8px;
+}
+
+.selection-settings summary {
+    cursor: pointer;
+    font-size: 13px;
+    color: #555;
+}
+
+.selection-setting-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0 0 12px;
+    font-size: 13px;
+}
+
+.combined-selection-hint {
+    margin: 8px 0 0 12px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #555;
 }
 
 /* The switch - https://www.w3schools.com/howto/howto_css_switch.asp */
@@ -169,6 +209,7 @@ button:hover {
     display: inline-block;
     width: 34px;
     height: 20px;
+    flex: 0 0 34px;
 }
 
 .switch input {

@@ -143,6 +143,10 @@ const speakButton = document.getElementById('speak-button');
 const speakInputButton = document.getElementById('speak-input-button');
 const copyButton = document.getElementById('copy-button');
 const selectionTranslateToggle = document.getElementById('selection-translate-toggle');
+const disableEditableToggle = document.getElementById('disable-editable-toggle');
+const autoTranslateToggle = document.getElementById('auto-translate-toggle');
+const requireCtrlToggle = document.getElementById('require-ctrl-toggle');
+const combinedSelectionHint = document.getElementById('combined-selection-hint');
 const screenshotTranslateButton = document.getElementById('screenshot-translate-button');
 const settingsIconButton = document.getElementById('settings-icon-button');
 
@@ -226,11 +230,41 @@ targetLanguageSelect.addEventListener('change', () => {
 
 selectionTranslateToggle.addEventListener('change', () => {
     chrome.storage.local.set({ isSelectionTranslationEnabled: selectionTranslateToggle.checked });
+    updateCombinedSelectionHint();
 });
 
+disableEditableToggle.addEventListener('change', () => {
+    chrome.storage.local.set({ disableTranslationInEditable: disableEditableToggle.checked });
+});
+
+autoTranslateToggle.addEventListener('change', () => {
+    chrome.storage.local.set({ translateOnSelection: autoTranslateToggle.checked });
+    updateCombinedSelectionHint();
+});
+
+requireCtrlToggle.addEventListener('change', () => {
+    chrome.storage.local.set({ requireCtrlOnSelection: requireCtrlToggle.checked });
+    updateCombinedSelectionHint();
+});
+
+function updateCombinedSelectionHint() {
+    combinedSelectionHint.hidden = !(
+        selectionTranslateToggle.checked && autoTranslateToggle.checked && requireCtrlToggle.checked
+    );
+}
+
 function loadSettings() {
-    chrome.storage.local.get(['isSelectionTranslationEnabled'], (result) => {
+    chrome.storage.local.get([
+        'isSelectionTranslationEnabled',
+        'disableTranslationInEditable',
+        'translateOnSelection',
+        'requireCtrlOnSelection'
+    ], (result) => {
         selectionTranslateToggle.checked = result.isSelectionTranslationEnabled !== false; // Default to true
+        disableEditableToggle.checked = result.disableTranslationInEditable === true;
+        autoTranslateToggle.checked = result.translateOnSelection === true;
+        requireCtrlToggle.checked = result.requireCtrlOnSelection === true;
+        updateCombinedSelectionHint();
     });
 }
 

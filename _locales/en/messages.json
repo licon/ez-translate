@@ -568,6 +568,21 @@
     "langPapiamento": {
         "message": "Papiamento"
     },
+    "selectionSettingsLabel": {
+        "message": "Selection settings"
+    },
+    "disableTranslationInEditableLabel": {
+        "message": "Disable translation in text fields"
+    },
+    "translateOnSelectionLabel": {
+        "message": "Translate immediately after selection"
+    },
+    "requireCtrlOnSelectionLabel": {
+        "message": "Press Ctrl after selecting to translate"
+    },
+    "combinedSelectionHint": {
+        "message": "When both are on, translation starts immediately after selection; Ctrl and the icon are not needed."
+    },
     "selectionTranslateLabel": {
         "message": "Enable In-Page Translation",
         "description": "Label for the toggle switch to enable/disable in-page selection translation."

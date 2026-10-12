@@ -568,6 +568,21 @@
     "langPapiamento": {
         "message": "البابيامنتو"
     },
+    "selectionSettingsLabel": {
+        "message": "إعدادات التحديد"
+    },
+    "disableTranslationInEditableLabel": {
+        "message": "تعطيل الترجمة في حقول النص"
+    },
+    "translateOnSelectionLabel": {
+        "message": "الترجمة فور الانتهاء من التحديد"
+    },
+    "requireCtrlOnSelectionLabel": {
+        "message": "اضغط Ctrl بعد تحديد النص للترجمة"
+    },
+    "combinedSelectionHint": {
+        "message": "عند تفعيل الخيارين، تبدأ الترجمة فور تحديد النص؛ لا حاجة للضغط على Ctrl أو الأيقونة."
+    },
     "selectionTranslateLabel": {
         "message": "تمكين الترجمة على الصفحة",
         "description": "تسمية مفتاح التبديل لتمكين/تعطيل ترجمة التحديد على الصفحة."

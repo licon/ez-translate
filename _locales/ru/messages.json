@@ -568,6 +568,21 @@
     "langPapiamento": {
         "message": "Папьяменто"
     },
+    "selectionSettingsLabel": {
+        "message": "Настройки выделения"
+    },
+    "disableTranslationInEditableLabel": {
+        "message": "Отключить перевод в текстовых полях"
+    },
+    "translateOnSelectionLabel": {
+        "message": "Переводить сразу после выделения"
+    },
+    "requireCtrlOnSelectionLabel": {
+        "message": "Нажать Ctrl после выделения для перевода"
+    },
+    "combinedSelectionHint": {
+        "message": "Если включены оба параметра, перевод начинается сразу после выделения; нажимать Ctrl или значок не нужно."
+    },
     "selectionTranslateLabel": {
         "message": "Включить перевод на странице",
         "description": "Надпись для переключателя для включения/выключения перевода выделенного текста на странице."
